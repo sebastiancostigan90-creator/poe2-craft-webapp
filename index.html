@@ -13,9 +13,17 @@
             --border-gold: #735d38;
             --border-gold-hover: #cbb07e;
             --gold-text: #cbb07e;
-            --prefix-color: #8888ff;  
-            --suffix-color: #339933;  
-            --meta-color: #ffaa33;    
+            
+            /* Цвета по классификации PoE2 */
+            --prefix-color: #8888ff;  /* Голубой */
+            --suffix-color: #339933;  /* Базовый зеленый суффикс */
+            
+            /* Спец-пулы (Цвета по твоему ТЗ) */
+            --attack-color: #2ecc71;  /* Зеленый - Атакующие */
+            --caster-color: #e74c3c;  /* Красный - Кастерские */
+            --chrono-color: #ffffff;  /* Белый - Хрономансер */
+            --soul-color: #9b59b6;    /* Фиолетовый - Души */
+            
             --text-main: #c8c8c8;
         }
 
@@ -36,12 +44,42 @@
             color: var(--gold-text);
             text-align: center;
             letter-spacing: 2px;
-            font-size: 17px;
-            margin: 10px 0;
+            font-size: 16px;
+            margin: 8px 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.9);
             border-bottom: 2px solid var(--border-gold);
             padding-bottom: 6px;
         }
+
+        /* Табы (Вкладки) */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: #0f1115;
+            border: 1px solid var(--border-gold);
+            color: var(--text-main);
+            padding: 8px;
+            font-size: 11px;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(to bottom, #5a4728 0%, #1c1409 100%);
+            color: var(--gold-text);
+            border-color: var(--border-gold-hover);
+            font-weight: bold;
+            box-shadow: inset 0 0 5px rgba(203,176,126,0.4);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         .poe-panel {
             background-color: var(--panel-bg);
@@ -108,30 +146,26 @@
         .badge-prefix { background: rgba(136,136,255,0.15); color: var(--prefix-color); border: 1px solid var(--prefix-color); }
         .badge-suffix { background: rgba(51,153,51,0.15); color: var(--suffix-color); border: 1px solid var(--suffix-color); }
 
-        .meta-box {
-            background: rgba(255, 170, 51, 0.05);
-            border: 1px dashed var(--meta-color);
-            padding: 8px;
-            border-radius: 3px;
-            margin-top: 6px;
-        }
-        
-        .checkbox-group {
+        /* Стили для продвинутых галочек */
+        .advanced-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
         }
-
-        .meta-label {
+        .adv-label {
             display: flex;
             align-items: center;
             font-size: 11px;
-            color: var(--meta-color);
             cursor: pointer;
             font-weight: 600;
         }
-        .meta-label input { width: auto; margin-right: 8px; margin-bottom: 0; accent-color: var(--gold-text); }
+        .adv-label input { width: auto; margin-right: 8px; margin-bottom: 0; accent-color: var(--gold-text); }
+        
+        .lbl-attack { color: var(--attack-color); }
+        .lbl-caster { color: var(--caster-color); }
+        .lbl-chrono { color: var(--chrono-color); }
+        .lbl-soul { color: var(--soul-color); }
+        .lbl-astrid { color: var(--gold-text); }
 
         .poe-btn {
             font-family: 'Cinzel', serif;
@@ -162,10 +196,16 @@
 <div class="container">
     <h2>ExileForge Configurator</h2>
 
-    <!-- База предмета -->
+    <!-- Переключение Вкладок -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('basic')">⚖️ Базовый крафт</button>
+        <button class="tab-btn" onclick="switchTab('advanced')">✨ Продвинутый крафт</button>
+    </div>
+
+    <!-- Общие настройки для обеих вкладок -->
     <div class="poe-panel">
         <label for="itemType">Item Category</label>
-        <select id="itemType" onchange="renderModSelectors()">
+        <select id="itemType" onchange="rebuildUI()">
             <option value="Gloves">Gloves</option>
             <option value="Ring">Ring</option>
             <option value="Amulet">Amulet</option>
@@ -175,51 +215,56 @@
             <option value="Boots">Boots</option>
             <option value="Belt">Belt</option>
         </select>
-    </div>
 
-    <!-- Бюджет -->
-    <div class="poe-panel">
-        <label for="budget">Max Budget (Divine Orbs)</label>
+        <label for="budget" style="margin-top: 6px;">Max Budget (Divine Orbs)</label>
         <input type="number" id="budget" value="20">
     </div>
 
-    <!-- Модификаторы пула (Префиксы и Суффиксы) -->
-    <div class="poe-panel">
-        <div class="section-title prefix-title"><span>🔹 Префиксы</span></div>
-        <div id="prefix-container"></div>
+    <!-- Вкладка 1: Базовый крафт (Строго 3 префикса и 3 суффикса) -->
+    <div id="tab-basic" class="tab-content active">
+        <div class="poe-panel">
+            <div class="section-title prefix-title"><span>🔹 Префиксы (База: 3)</span></div>
+            <div id="basic-prefix-container"></div>
 
-        <div class="section-title suffix-title" style="margin-top: 10px;">
-            <span>🔸 Суффиксы (включая 4-й слот)</span>
+            <div class="section-title suffix-title" style="margin-top: 10px;"><span>🔸 Суффиксы (База: 3)</span></div>
+            <div id="basic-suffix-container"></div>
         </div>
-        <div id="suffix-container"></div>
     </div>
 
-    <!-- Галочки для модификаторов, влияющих на пул (Руны, Соулы, Модификаторы) -->
-    <div class="poe-panel">
-        <div class="meta-box">
-            <label style="color: var(--meta-color); margin-bottom: 6px; font-weight: bold;">⚖️ Модификаторы и Руны пула (Pool Modifiers):</label>
-            <div class="checkbox-group">
-                <label class="meta-label">
-                    <input type="checkbox" class="pool-chk" value="Can roll Chronomancer Modifiers"> 
-                    Can roll Chronomancer Modifiers (Руна времени)
+    <!-- Вкладка 2: Продвинутый крафт (Динамические пулы и 4-й суффикс) -->
+    <div id="tab-advanced" class="tab-content">
+        <div class="poe-panel">
+            <label style="color: var(--gold-text); margin-bottom: 6px; font-weight: bold;">🧩 Расширение пула модов (Галочки):</label>
+            <div class="advanced-group">
+                <label class="adv-label lbl-attack">
+                    <input type="checkbox" id="chk_attack" onchange="rebuildUI()"> 
+                    Can roll Attack Modifiers (Атакующие)
                 </label>
-                <label class="meta-label">
-                    <input type="checkbox" class="pool-chk" value="Can roll Caster Modifiers"> 
-                    Can roll Caster Modifiers (Заклинания)
+                <label class="adv-label lbl-caster">
+                    <input type="checkbox" id="chk_caster" onchange="rebuildUI()"> 
+                    Can roll Caster Modifiers (Кастерские)
                 </label>
-                <label class="meta-label">
-                    <input type="checkbox" class="pool-chk" value="Can roll Attack Modifiers"> 
-                    Can roll Attack Modifiers (Атаки)
+                <label class="adv-label lbl-chrono">
+                    <input type="checkbox" id="chk_chrono" onchange="rebuildUI()"> 
+                    Can roll Chronomancer Modifiers (Хрономансер)
                 </label>
-                <label class="meta-label">
-                    <input type="checkbox" class="pool-chk" value="Soul Modifiers Enabled"> 
-                    Soul Modifiers Pool Enabled (Души / Броня)
+                <label class="adv-label lbl-soul">
+                    <input type="checkbox" id="chk_soul" onchange="rebuildUI()"> 
+                    Soul Modifiers Pool (Души)
                 </label>
-                <label class="meta-label">
-                    <input type="checkbox" class="pool-chk" value="Expanded 4th Suffix Slot"> 
-                    Expanded 4th Suffix Slot (Спец. база)
+                <label class="adv-label lbl-astrid">
+                    <input type="checkbox" id="chk_astrid" onchange="rebuildUI()"> 
+                    Креативность Астрид (Разрешить 4-й суффикс)
                 </label>
             </div>
+        </div>
+
+        <div class="poe-panel">
+            <div class="section-title prefix-title"><span>🔹 Префиксы (Продвинутые)</span></div>
+            <div id="adv-prefix-container"></div>
+
+            <div class="section-title suffix-title" style="margin-top: 10px;"><span id="adv-suffix-title-text">🔸 Суффиксы (Слотов: 3)</span></div>
+            <div id="adv-suffix-container"></div>
         </div>
     </div>
 
@@ -230,66 +275,108 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    const poe2StructuredMods = {
+    // Базовые пулы модов
+    const baseMods = {
         "Gloves": {
-            prefixes: ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage to Attacks", "Flat Fire Damage to Attacks", "Flat Cold Damage to Attacks", "Flat Lightning Damage to Attacks"],
-            suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed", "Deflection Rating"]
+            prefixes: ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage"],
+            suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed"]
         },
         "Ring": {
-            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Added Physical Damage to Attacks", "Added Elemental Damage to Attacks"],
-            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items", "Attributes (Str/Dex/Int)"]
+            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield"],
+            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed"]
         },
         "Amulet": {
-            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "% Increased Attributes", "Energy Shield %"],
-            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Mana Regeneration Rate", "Critical Strike Chance"]
+            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Multiplier"],
+            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance"]
         },
         "Bow": {
-            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills", "Elemental Damage to Attacks", "Critical Strike Chance for Bows"],
-            suffixes: ["Attack Speed", "Critical Strike Multiplier", "Accuracy Rating", "Attribute Requirements", "Projectiles pierce additional target"]
+            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills"],
+            suffixes: ["Attack Speed", "Critical Strike Chance", "Accuracy Rating"]
         },
         "BodyArmour": {
-            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / Evasion / ES", "Soul modifiers (Increased Soul Generation / Effect)"],
-            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery", "Attribute Requirements", "Soul modifiers (Reduced Soul Consumption)"]
+            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / ES"],
+            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery"]
         },
         "Helmet": {
-            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life / Mana", "Soul Gain Prevention Duration"],
-            suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements", "Stun Threshold"]
+            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life"],
+            suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements"]
         },
         "Boots": {
-            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery", "Energy Shield Recharge Rate"],
-            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage", "Avoid Elemental Ailments"]
+            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery"],
+            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage"]
         },
         "Belt": {
-            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained", "Charm Charges gained"],
-            suffixes: ["Resistances", "Strength / Life Regen", "Charm Effect Duration", "Reduced Flask Charges used"]
+            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained"],
+            suffixes: ["Resistances", "Strength / Life Regen"]
         }
     };
+
+    // Специфические моды, которые добавляются по галочкам в продвинутом крафте
+    const advancedPools = {
+        attack: ["Added Physical Damage to Attacks", "Attack Damage Leeched as Life", "Increased Attack Speed per Frenzy Charge"],
+        caster: ["Increased Spell Damage", "Faster Casting", "+1 to Level of All Spell Skill Gems", "Gain Mana per Enemy Killed"],
+        chrono: ["Time-woven Armor Bonus", "Chronomancer Action Speed Boost", "Delayed Damage mitigation"],
+        soul: ["Soul Generation Rate", "Reduced Soul Consumption", "Soul Eater effect duration"]
+    };
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        if (tabName === 'basic') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('tab-basic').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('tab-advanced').classList.add('active');
+        }
+        rebuildUI();
+    }
 
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         const itemTypeParam = urlParams.get('type');
-        if (itemTypeParam && poe2StructuredMods[itemTypeParam]) {
+        if (itemTypeParam && baseMods[itemTypeParam]) {
             document.getElementById('itemType').value = itemTypeParam;
         }
-        renderModSelectors();
+        rebuildUI();
     };
 
-    function renderModSelectors() {
+    function rebuildUI() {
         const category = document.getElementById('itemType').value;
-        const data = poe2StructuredMods[category] || { prefixes: ["Maximum Life"], suffixes: ["Fire Resistance"] };
+        const base = baseMods[category] || { prefixes: ["Maximum Life"], suffixes: ["Fire Resistance"] };
 
-        const prefContainer = document.getElementById('prefix-container');
-        const suffContainer = document.getElementById('suffix-container');
-        prefContainer.innerHTML = '';
-        suffContainer.innerHTML = '';
+        // Собираем динамический пул для продвинутой вкладки
+        let advPrefixes = [...base.prefixes];
+        let advSuffixes = [...base.suffixes];
 
-        // 3 слота префиксов
-        for (let i = 0; i < 3; i++) {
-            prefContainer.appendChild(createRow('prefix', data.prefixes, i + 1));
+        if (document.getElementById('chk_attack').checked) advPrefixes.push(...advancedPools.attack);
+        if (document.getElementById('chk_caster').checked) advPrefixes.push(...advancedPools.caster);
+        if (document.getElementById('chk_chrono').checked) advSuffixes.push(...advancedPools.chrono);
+        if (document.getElementById('chk_soul').checked) {
+            advPrefixes.push("Soul Generation Rate");
+            advSuffixes.push("Reduced Soul Consumption");
         }
-        // 4 слота суффиксов
-        for (let i = 0; i < 4; i++) {
-            suffContainer.appendChild(createRow('suffix', data.suffixes, i + 1));
+
+        // Рендерим Базовую вкладку (Строго 3 и 3)
+        renderContainer('basic-prefix-container', 'prefix', base.prefixes, 3);
+        renderContainer('basic-suffix-container', 'suffix', base.suffixes, 3);
+
+        // Рендерим Продвинутую вкладку (С учетом Астрид на 4-й суффикс)
+        const allowAstrid = document.getElementById('chk_astrid').checked;
+        const suffixSlots = allowAstrid ? 4 : 3;
+        
+        document.getElementById('adv-suffix-title-text').textContent = `🔸 Суффиксы (Слотов: ${suffixSlots}${allowAstrid ? ' [Астрид]' : ''})`;
+
+        renderContainer('adv-prefix-container', 'prefix', advPrefixes, 3);
+        renderContainer('adv-suffix-container', 'suffix', advSuffixes, suffixSlots);
+    }
+
+    function renderContainer(containerId, type, list, count) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            container.appendChild(createRow(type, list, i + 1));
         }
     }
 
@@ -335,31 +422,40 @@
         const itemType = document.getElementById('itemType').value;
         const budget = document.getElementById('budget').value;
         
+        // Определяем, какая вкладка сейчас активна, чтобы забрать данные оттуда
+        const isAdvanced = document.getElementById('tab-advanced').classList.contains('active');
+        const prefixContainerId = isAdvanced ? 'adv-prefix-container' : 'basic-prefix-container';
+        const suffixContainerId = isAdvanced ? 'adv-suffix-container' : 'basic-suffix-container';
+
         let mods = [];
 
-        document.querySelectorAll('#prefix-container .mod-row').forEach(row => {
+        document.querySelectorAll(`#${prefixContainerId} .mod-row`).forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
             const tier = row.querySelector('.tier-choice').value;
             if (mod) mods.push(`[Prefix] ${mod} (${tier})`);
         });
 
-        document.querySelectorAll('#suffix-container .mod-row').forEach(row => {
+        document.querySelectorAll(`#${suffixContainerId} .mod-row`).forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
             const tier = row.querySelector('.tier-choice').value;
             if (mod) mods.push(`[Suffix] ${mod} (${tier})`);
         });
 
-        // Собираем отмеченные галочки рун и пул-модификаторов
-        let poolOptions = [];
-        document.querySelectorAll('.pool-chk:checked').forEach(chk => {
-            poolOptions.push(chk.value);
-        });
+        let activeOptions = [];
+        if (isAdvanced) {
+            if (document.getElementById('chk_attack').checked) activeOptions.push("Attack Modifiers Pool");
+            if (document.getElementById('chk_caster').checked) activeOptions.push("Caster Modifiers Pool");
+            if (document.getElementById('chk_chrono').checked) activeOptions.push("Chronomancer Pool");
+            if (document.getElementById('chk_soul').checked) activeOptions.push("Soul Modifiers Pool");
+            if (document.getElementById('chk_astrid').checked) activeOptions.push("Astrid Creativity (4 Suffixes)");
+        }
 
         const payload = {
+            craft_mode: isAdvanced ? "Advanced" : "Basic",
             item_type: itemType,
             budget: budget,
             mods: mods.length > 0 ? mods : ["Any mods"],
-            options: poolOptions
+            options: activeOptions
         };
 
         tg.sendData(JSON.stringify(payload));
