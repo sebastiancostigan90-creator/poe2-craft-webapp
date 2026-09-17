@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExileForge - PoE 2 Craft Configurator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем шрифты в стиле Path of Exile -->
-    <link href="https://fonts.googleapis.com/css2?family=Fontdiner+Swanky&family=Cinzel:wght@500;700&family=Font+Awesome+5+Free&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #050608;
@@ -14,12 +13,10 @@
             --border-gold: #735d38;
             --border-gold-hover: #cbb07e;
             --gold-text: #cbb07e;
-            
-            /* Цветовая гамма PoE2DB для модов */
-            --prefix-color: #8888ff;  /* Голубой для префиксов */
-            --suffix-color: #339933;  /* Зеленоватый/Бирюзовый для суффиксов (или PoE standard) */
-            --meta-color: #b0e0e6;    /* Мета-моды и руны */
-            --text-main: #bofaeb;
+            --prefix-color: #8888ff;  
+            --suffix-color: #339933;  
+            --meta-color: #ffaa33;    
+            --text-main: #c8c8c8;
         }
 
         body {
@@ -39,7 +36,7 @@
             color: var(--gold-text);
             text-align: center;
             letter-spacing: 2px;
-            font-size: 18px;
+            font-size: 17px;
             margin: 10px 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.9);
             border-bottom: 2px solid var(--border-gold);
@@ -84,14 +81,11 @@
         }
 
         .section-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             margin: 8px 0 4px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
         .prefix-title { color: var(--prefix-color); border-bottom: 1px solid rgba(136,136,255,0.3); }
         .suffix-title { color: var(--suffix-color); border-bottom: 1px solid rgba(51,153,51,0.3); }
@@ -105,37 +99,39 @@
 
         .slot-badge {
             font-size: 10px;
-            padding: 2px 5px;
+            padding: 2px 4px;
             border-radius: 2px;
             font-weight: bold;
             text-align: center;
-            width: 55px;
+            width: 60px;
         }
         .badge-prefix { background: rgba(136,136,255,0.15); color: var(--prefix-color); border: 1px solid var(--prefix-color); }
         .badge-suffix { background: rgba(51,153,51,0.15); color: var(--suffix-color); border: 1px solid var(--suffix-color); }
 
         .meta-box {
-            background: rgba(176, 224, 230, 0.05);
+            background: rgba(255, 170, 51, 0.05);
             border: 1px dashed var(--meta-color);
             padding: 8px;
             border-radius: 3px;
             margin-top: 6px;
         }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
         .meta-label {
             display: flex;
             align-items: center;
             font-size: 11px;
             color: var(--meta-color);
             cursor: pointer;
+            font-weight: 600;
         }
-        .meta-label input { width: auto; margin-right: 6px; margin-bottom: 0; accent-color: var(--gold-text); }
-
-        #meta-dropdowns {
-            display: none;
-            margin-top: 6px;
-            padding-top: 6px;
-            border-top: 1px solid rgba(176,224,230,0.2);
-        }
+        .meta-label input { width: auto; margin-right: 8px; margin-bottom: 0; accent-color: var(--gold-text); }
 
         .poe-btn {
             font-family: 'Cinzel', serif;
@@ -159,19 +155,12 @@
             border-color: var(--border-gold-hover);
             color: #fff;
         }
-
-        .counter-info {
-            font-size: 11px;
-            text-align: right;
-            color: #888;
-            margin-bottom: 4px;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ExileForge Craft Setup</h2>
+    <h2>ExileForge Configurator</h2>
 
     <!-- База предмета -->
     <div class="poe-panel">
@@ -194,37 +183,42 @@
         <input type="number" id="budget" value="20">
     </div>
 
-    <!-- Моды с жестким разделением на Префиксы и Суффиксы (максимум 3+3) -->
+    <!-- Модификаторы пула (Префиксы и Суффиксы) -->
     <div class="poe-panel">
-        <div class="counter-info" id="slots-counter">Выбрано префиксов: 0/3 | суффиксов: 0/3</div>
-        
-        <div class="section-title prefix-title"><span>🔹 Префиксы (Max 3)</span></div>
+        <div class="section-title prefix-title"><span>🔹 Префиксы</span></div>
         <div id="prefix-container"></div>
 
-        <div class="section-title suffix-title" style="margin-top: 12px;"><span>🔸 Суффиксы (Max 3)</span></div>
+        <div class="section-title suffix-title" style="margin-top: 10px;">
+            <span>🔸 Суффиксы (включая 4-й слот)</span>
+        </div>
         <div id="suffix-container"></div>
     </div>
 
-    <!-- Блок продвинутых модных модификаторов и рун PoE 2 -->
+    <!-- Галочки для модификаторов, влияющих на пул (Руны, Соулы, Модификаторы) -->
     <div class="poe-panel">
         <div class="meta-box">
-            <label class="meta-label">
-                <input type="checkbox" id="enable_meta" onchange="toggleMetaBox()"> 
-                ⚡ Включить мета-крафт, руны и омены (PoE 2 Advanced)
-            </label>
-            
-            <div id="meta-dropdowns">
-                <label for="metaSelect">Специфический модификатор руны / станка:</label>
-                <select id="metaSelect">
-                    <option value="Can roll Chronomancer Modifiers">Can roll Chronomancer Modifiers (Руна времени)</option>
-                    <option value="Can roll Caster Modifiers">Can roll Caster Modifiers (Заклинания)</option>
-                    <option value="Can roll Attack Modifiers">Can roll Attack Modifiers (Атаки)</option>
-                    <option value="Cannot roll Elemental Modifiers">Cannot roll Elemental Modifiers (Блок стихий)</option>
-                    <option value="Prefixes Cannot Be Changed">Prefixes Cannot Be Changed (Мета-крафт станка)</option>
-                    <option value="Suffixes Cannot Be Changed">Suffixes Cannot Be Changed (Мета-крафт станка)</option>
-                    <option value="Omen of Sinistral Crystallization">Omen of Sinistral Crystallization (Защита суффиксов)</option>
-                    <option value="Omen of Dextral Crystallization">Omen of Dextral Crystallization (Защита префиксов)</option>
-                </select>
+            <label style="color: var(--meta-color); margin-bottom: 6px; font-weight: bold;">⚖️ Модификаторы и Руны пула (Pool Modifiers):</label>
+            <div class="checkbox-group">
+                <label class="meta-label">
+                    <input type="checkbox" class="pool-chk" value="Can roll Chronomancer Modifiers"> 
+                    Can roll Chronomancer Modifiers (Руна времени)
+                </label>
+                <label class="meta-label">
+                    <input type="checkbox" class="pool-chk" value="Can roll Caster Modifiers"> 
+                    Can roll Caster Modifiers (Заклинания)
+                </label>
+                <label class="meta-label">
+                    <input type="checkbox" class="pool-chk" value="Can roll Attack Modifiers"> 
+                    Can roll Attack Modifiers (Атаки)
+                </label>
+                <label class="meta-label">
+                    <input type="checkbox" class="pool-chk" value="Soul Modifiers Enabled"> 
+                    Soul Modifiers Pool Enabled (Души / Броня)
+                </label>
+                <label class="meta-label">
+                    <input type="checkbox" class="pool-chk" value="Expanded 4th Suffix Slot"> 
+                    Expanded 4th Suffix Slot (Спец. база)
+                </label>
             </div>
         </div>
     </div>
@@ -236,39 +230,38 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Строго разделенная база модов на Префиксы и Суффиксы для PoE 2
     const poe2StructuredMods = {
         "Gloves": {
             prefixes: ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage to Attacks", "Flat Fire Damage to Attacks", "Flat Cold Damage to Attacks", "Flat Lightning Damage to Attacks"],
             suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed", "Deflection Rating"]
         },
         "Ring": {
-            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Added Physical Damage to Attacks"],
-            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items"]
+            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Added Physical Damage to Attacks", "Added Elemental Damage to Attacks"],
+            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items", "Attributes (Str/Dex/Int)"]
         },
         "Amulet": {
-            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "% Increased Attributes"],
-            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Mana Regeneration Rate"]
+            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "% Increased Attributes", "Energy Shield %"],
+            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Mana Regeneration Rate", "Critical Strike Chance"]
         },
         "Bow": {
-            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills", "Elemental Damage to Attacks"],
-            suffixes: ["Attack Speed", "Critical Strike Chance", "Accuracy Rating", "Attribute Requirements"]
+            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills", "Elemental Damage to Attacks", "Critical Strike Chance for Bows"],
+            suffixes: ["Attack Speed", "Critical Strike Multiplier", "Accuracy Rating", "Attribute Requirements", "Projectiles pierce additional target"]
         },
         "BodyArmour": {
-            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / Evasion / ES"],
-            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery", "Attribute Requirements"]
+            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / Evasion / ES", "Soul modifiers (Increased Soul Generation / Effect)"],
+            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery", "Attribute Requirements", "Soul modifiers (Reduced Soul Consumption)"]
         },
         "Helmet": {
-            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life / Mana"],
+            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life / Mana", "Soul Gain Prevention Duration"],
             suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements", "Stun Threshold"]
         },
         "Boots": {
-            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery"],
-            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage"]
+            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery", "Energy Shield Recharge Rate"],
+            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage", "Avoid Elemental Ailments"]
         },
         "Belt": {
-            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained"],
-            suffixes: ["Resistances", "Strength / Life Regen", "Charm Charges gained"]
+            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained", "Charm Charges gained"],
+            suffixes: ["Resistances", "Strength / Life Regen", "Charm Effect Duration", "Reduced Flask Charges used"]
         }
     };
 
@@ -281,11 +274,6 @@
         renderModSelectors();
     };
 
-    function toggleMetaBox() {
-        const box = document.getElementById('meta-dropdowns');
-        box.style.display = document.getElementById('enable_meta').checked ? 'block' : 'none';
-    }
-
     function renderModSelectors() {
         const category = document.getElementById('itemType').value;
         const data = poe2StructuredMods[category] || { prefixes: ["Maximum Life"], suffixes: ["Fire Resistance"] };
@@ -295,15 +283,14 @@
         prefContainer.innerHTML = '';
         suffContainer.innerHTML = '';
 
-        // Рисуем 3 слота для префиксов
+        // 3 слота префиксов
         for (let i = 0; i < 3; i++) {
             prefContainer.appendChild(createRow('prefix', data.prefixes, i + 1));
         }
-        // Рисуем 3 слота для суффиксов
-        for (let i = 0; i < 3; i++) {
+        // 4 слота суффиксов
+        for (let i = 0; i < 4; i++) {
             suffContainer.appendChild(createRow('suffix', data.suffixes, i + 1));
         }
-        updateCounters();
     }
 
     function createRow(type, modList, index) {
@@ -316,11 +303,10 @@
 
         let selectMod = document.createElement('select');
         selectMod.className = 'mod-choice';
-        selectMod.onchange = updateCounters;
 
         let defaultOpt = document.createElement('option');
         defaultOpt.value = "";
-        defaultOpt.textContent = "-- Не выбран (Свободный слот) --";
+        defaultOpt.textContent = "-- Свободный слот (Любой) --";
         selectMod.appendChild(defaultOpt);
 
         modList.forEach(mod => {
@@ -345,50 +331,35 @@
         return row;
     }
 
-    function updateCounters() {
-        const prefRows = document.querySelectorAll('#prefix-container .mod-choice');
-        const suffRows = document.querySelectorAll('#suffix-container .mod-choice');
-        
-        let prefsCount = 0;
-        let suffsCount = 0;
-
-        prefRows.forEach(el => { if(el.value) prefsCount++; });
-        suffRows.forEach(el => { if(el.value) suffsCount++; });
-
-        document.getElementById('slots-counter').textContent = `Выбрано префиксов: ${prefsCount}/3 | суффиксов: ${suffsCount}/3`;
-    }
-
     function submitConfig() {
         const itemType = document.getElementById('itemType').value;
         const budget = document.getElementById('budget').value;
         
         let mods = [];
 
-        // Собираем префиксы
         document.querySelectorAll('#prefix-container .mod-row').forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
             const tier = row.querySelector('.tier-choice').value;
             if (mod) mods.push(`[Prefix] ${mod} (${tier})`);
         });
 
-        // Собираем суффиксы
         document.querySelectorAll('#suffix-container .mod-row').forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
             const tier = row.querySelector('.tier-choice').value;
             if (mod) mods.push(`[Suffix] ${mod} (${tier})`);
         });
 
-        // Собираем мета-крафт и руны
-        let options = [];
-        if (document.getElementById('enable_meta').checked) {
-            options.push(document.getElementById('metaSelect').value);
-        }
+        // Собираем отмеченные галочки рун и пул-модификаторов
+        let poolOptions = [];
+        document.querySelectorAll('.pool-chk:checked').forEach(chk => {
+            poolOptions.push(chk.value);
+        });
 
         const payload = {
             item_type: itemType,
             budget: budget,
             mods: mods.length > 0 ? mods : ["Any mods"],
-            options: options
+            options: poolOptions
         };
 
         tg.sendData(JSON.stringify(payload));
