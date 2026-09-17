@@ -5,26 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExileForge - PoE 2 Craft Configurator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fontdiner+Swanky&family=Cinzel:wght@600;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Подключаем шрифты в стиле Path of Exile -->
+    <link href="https://fonts.googleapis.com/css2?family=Fontdiner+Swanky&family=Cinzel:wght@500;700&family=Font+Awesome+5+Free&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #07080a;
-            --panel-bg: #101216;
-            --border-gold: #8d7348;
-            --border-gold-hover: #f1d7a3;
+            --bg-dark: #050608;
+            --panel-bg: #0f1115;
+            --border-gold: #735d38;
+            --border-gold-hover: #cbb07e;
             --gold-text: #cbb07e;
-            --blue-mod: #8888ff; /* Цвет синих модов как на poe2db */
-            --crafted-mod: #b0e0e6; /* Цвет свойств со станка / рун */
-            --text-main: #c8c8c8;
+            
+            /* Цветовая гамма PoE2DB для модов */
+            --prefix-color: #8888ff;  /* Голубой для префиксов */
+            --suffix-color: #339933;  /* Зеленоватый/Бирюзовый для суффиксов (или PoE standard) */
+            --meta-color: #b0e0e6;    /* Мета-моды и руны */
+            --text-main: #bofaeb;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Cinzel', 'Segoe UI', serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
             margin: 0;
-            padding: 12px;
-            background-image: radial-gradient(circle at 50% 0%, #1a1c23 0%, #07080a 75%);
+            padding: 10px;
+            background-image: radial-gradient(circle at 50% 0%, #161922 0%, #050608 80%);
             min-height: 100vh;
         }
 
@@ -34,262 +38,350 @@
             font-family: 'Cinzel', serif;
             color: var(--gold-text);
             text-align: center;
-            letter-spacing: 1.5px;
-            margin-bottom: 14px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+            font-size: 18px;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
             border-bottom: 2px solid var(--border-gold);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .poe-panel {
             background-color: var(--panel-bg);
             border: 2px solid var(--border-gold);
             border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.5);
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.6);
         }
 
         label {
             display: block;
             color: var(--gold-text);
-            font-family: 'Cinzel', serif;
-            font-size: 12px;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         select, input {
             width: 100%;
-            background-color: #040507;
+            background-color: #030405;
             border: 1px solid var(--border-gold);
-            color: var(--blue-mod); /* Текст в стилистике статов poe2db */
-            padding: 9px;
+            color: #fff;
+            padding: 8px;
             border-radius: 3px;
             box-sizing: border-box;
-            font-size: 13px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            font-family: 'Segoe UI', sans-serif;
+            margin-bottom: 6px;
         }
 
         select:focus, input:focus {
             outline: none;
             border-color: var(--border-gold-hover);
-            box-shadow: 0 0 6px rgba(203, 176, 126, 0.4);
+            box-shadow: 0 0 6px rgba(203, 176, 126, 0.5);
         }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            margin: 8px 0 4px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prefix-title { color: var(--prefix-color); border-bottom: 1px solid rgba(136,136,255,0.3); }
+        .suffix-title { color: var(--suffix-color); border-bottom: 1px solid rgba(51,153,51,0.3); }
 
         .mod-row {
             display: flex;
             gap: 6px;
             margin-bottom: 6px;
+            align-items: center;
         }
 
-        .checkbox-container {
-            background: rgba(141, 115, 72, 0.08);
-            border: 1px dashed var(--border-gold);
+        .slot-badge {
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 2px;
+            font-weight: bold;
+            text-align: center;
+            width: 55px;
+        }
+        .badge-prefix { background: rgba(136,136,255,0.15); color: var(--prefix-color); border: 1px solid var(--prefix-color); }
+        .badge-suffix { background: rgba(51,153,51,0.15); color: var(--suffix-color); border: 1px solid var(--suffix-color); }
+
+        .meta-box {
+            background: rgba(176, 224, 230, 0.05);
+            border: 1px dashed var(--meta-color);
             padding: 8px;
             border-radius: 3px;
-            margin-top: 8px;
+            margin-top: 6px;
         }
-
-        .checkbox-label {
+        .meta-label {
             display: flex;
             align-items: center;
-            font-size: 12px;
-            color: var(--crafted-mod);
+            font-size: 11px;
+            color: var(--meta-color);
             cursor: pointer;
-            font-weight: 600;
         }
+        .meta-label input { width: auto; margin-right: 6px; margin-bottom: 0; accent-color: var(--gold-text); }
 
-        .checkbox-label input {
-            width: auto;
-            margin-right: 8px;
-            margin-bottom: 0;
-            accent-color: var(--gold-text);
-        }
-
-        #special-runes-box {
+        #meta-dropdowns {
             display: none;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(141, 115, 72, 0.3);
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(176,224,230,0.2);
         }
 
         .poe-btn {
             font-family: 'Cinzel', serif;
-            background: linear-gradient(to bottom, #4a3b22 0%, #20180c 100%);
+            background: linear-gradient(to bottom, #5a4728 0%, #1c1409 100%);
             color: var(--gold-text);
             border: 2px solid var(--border-gold);
-            padding: 12px;
+            padding: 10px;
             font-weight: bold;
-            border-radius: 4px;
+            border-radius: 3px;
             width: 100%;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 14px;
-            margin-top: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
+            letter-spacing: 2px;
+            font-size: 13px;
+            margin-top: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+            transition: all 0.2s;
         }
-
         .poe-btn:hover {
-            background: linear-gradient(to bottom, #63502f, #332714);
+            background: linear-gradient(to bottom, #7a6136, #2d210f);
             border-color: var(--border-gold-hover);
             color: #fff;
-            box-shadow: 0 0 10px rgba(241, 215, 163, 0.5);
+        }
+
+        .counter-info {
+            font-size: 11px;
+            text-align: right;
+            color: #888;
+            margin-bottom: 4px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ExileForge Configurator</h2>
+    <h2>ExileForge Craft Setup</h2>
 
-    <!-- Категория (подставляется ботом автоматически) -->
+    <!-- База предмета -->
     <div class="poe-panel">
-        <label for="itemType">Detected Item Category</label>
-        <select id="itemType" onchange="updateModsList()">
+        <label for="itemType">Item Category</label>
+        <select id="itemType" onchange="renderModSelectors()">
+            <option value="Gloves">Gloves</option>
             <option value="Ring">Ring</option>
             <option value="Amulet">Amulet</option>
             <option value="Bow">Bow</option>
             <option value="BodyArmour">Body Armour</option>
             <option value="Helmet">Helmet</option>
             <option value="Boots">Boots</option>
-            <option value="Gloves">Gloves</option>
             <option value="Belt">Belt</option>
         </select>
     </div>
 
     <!-- Бюджет -->
     <div class="poe-panel">
-        <label for="budget">Max Crafting Budget (Divine Orbs)</label>
+        <label for="budget">Max Budget (Divine Orbs)</label>
         <input type="number" id="budget" value="20">
     </div>
 
-    <!-- Выбор модов -->
+    <!-- Моды с жестким разделением на Префиксы и Суффиксы (максимум 3+3) -->
     <div class="poe-panel">
-        <label>Target Modifiers & Tiers</label>
-        <div id="dynamic-mods-container"></div>
+        <div class="counter-info" id="slots-counter">Выбрано префиксов: 0/3 | суффиксов: 0/3</div>
+        
+        <div class="section-title prefix-title"><span>🔹 Префиксы (Max 3)</span></div>
+        <div id="prefix-container"></div>
+
+        <div class="section-title suffix-title" style="margin-top: 12px;"><span>🔸 Суффиксы (Max 3)</span></div>
+        <div id="suffix-container"></div>
     </div>
 
-    <!-- Модные модификаторы, руны и омены (с галочкой) -->
+    <!-- Блок продвинутых модных модификаторов и рун PoE 2 -->
     <div class="poe-panel">
-        <div class="checkbox-container">
-            <label class="checkbox-label">
-                <input type="checkbox" id="enable_special" onchange="toggleSpecialRunes()"> 
-                ✨ Enable Special Runes / Meta-Mods (PoE 2 Advanced)
+        <div class="meta-box">
+            <label class="meta-label">
+                <input type="checkbox" id="enable_meta" onchange="toggleMetaBox()"> 
+                ⚡ Включить мета-крафт, руны и омены (PoE 2 Advanced)
             </label>
             
-            <div id="special-runes-box">
-                <label for="runeSelect">Select Specialized Mod / Rune Effect:</label>
-                <select id="runeSelect">
-                    <option value="Chronomancer Modifiers">Can roll Chronomancer / Time Modifiers</option>
-                    <option value="Caster Meta-Mod">Can roll Caster / Spell Modifiers</option>
-                    <option value="Attack Meta-Mod">Can roll Attack Modifiers</option>
-                    <option value="Astral Omen Protection">Omen of Astral / Crystallization (Extra Slot)</option>
-                    <option value="Fractured Synthesis">Force Synthesis / Fractured behavior</option>
+            <div id="meta-dropdowns">
+                <label for="metaSelect">Специфический модификатор руны / станка:</label>
+                <select id="metaSelect">
+                    <option value="Can roll Chronomancer Modifiers">Can roll Chronomancer Modifiers (Руна времени)</option>
+                    <option value="Can roll Caster Modifiers">Can roll Caster Modifiers (Заклинания)</option>
+                    <option value="Can roll Attack Modifiers">Can roll Attack Modifiers (Атаки)</option>
+                    <option value="Cannot roll Elemental Modifiers">Cannot roll Elemental Modifiers (Блок стихий)</option>
+                    <option value="Prefixes Cannot Be Changed">Prefixes Cannot Be Changed (Мета-крафт станка)</option>
+                    <option value="Suffixes Cannot Be Changed">Suffixes Cannot Be Changed (Мета-крафт станка)</option>
+                    <option value="Omen of Sinistral Crystallization">Omen of Sinistral Crystallization (Защита суффиксов)</option>
+                    <option value="Omen of Dextral Crystallization">Omen of Dextral Crystallization (Защита префиксов)</option>
                 </select>
             </div>
         </div>
     </div>
 
-    <button class="poe-btn" onclick="submitConfig()">НАЧАТЬ КРАФТ ПО ШАГАМ</button>
+    <button class="poe-btn" onclick="submitConfig()">Сгенерировать план крафта</button>
 </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Расширенная база модов под каждую категорию в стиле PoE 2
-    const poe2Mods = {
-        "Gloves": ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage to Attacks", "Flat Fire/Cold/Lightning Damage", "Lightning Resistance", "Cold Resistance", "Fire Resistance", "Attack Speed", "Deflection Rating"],
-        "Ring": ["Maximum Life", "Maximum Mana", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items"],
-        "Amulet": ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "Attributes (Str/Dex/Int)", "Elemental Resistances", "Mana Regeneration Rate"],
-        "Bow": ["Increased Physical Damage %", "Adds Physical Damage", "Attack Speed", "Critical Strike Chance", "Elemental Damage to Attacks", "+1 to Level of Bow Skills"],
-        "BodyArmour": ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / ES", "Elemental Resistances", "Movement Speed / Life Regen"],
-        "Helmet": ["Maximum Life", "Resistances", "Mana", "Cooldown Recovery", "Armor/ES"],
-        "Boots": ["Movement Speed", "Maximum Life", "Resistances", "Suppress Spell Damage"],
-        "Belt": ["Maximum Life", "Flask/Charm charges", "Armor", "Resistances", "Strength / Life Regen"]
+    // Строго разделенная база модов на Префиксы и Суффиксы для PoE 2
+    const poe2StructuredMods = {
+        "Gloves": {
+            prefixes: ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage to Attacks", "Flat Fire Damage to Attacks", "Flat Cold Damage to Attacks", "Flat Lightning Damage to Attacks"],
+            suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed", "Deflection Rating"]
+        },
+        "Ring": {
+            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Added Physical Damage to Attacks"],
+            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items"]
+        },
+        "Amulet": {
+            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "% Increased Attributes"],
+            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Mana Regeneration Rate"]
+        },
+        "Bow": {
+            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills", "Elemental Damage to Attacks"],
+            suffixes: ["Attack Speed", "Critical Strike Chance", "Accuracy Rating", "Attribute Requirements"]
+        },
+        "BodyArmour": {
+            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / Evasion / ES"],
+            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery", "Attribute Requirements"]
+        },
+        "Helmet": {
+            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life / Mana"],
+            suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements", "Stun Threshold"]
+        },
+        "Boots": {
+            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery"],
+            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage"]
+        },
+        "Belt": {
+            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained"],
+            suffixes: ["Resistances", "Strength / Life Regen", "Charm Charges gained"]
+        }
     };
 
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         const itemTypeParam = urlParams.get('type');
-        const selectElement = document.getElementById('itemType');
-        
-        if (itemTypeParam && poe2Mods[itemTypeParam]) {
-            selectElement.value = itemTypeParam;
+        if (itemTypeParam && poe2StructuredMods[itemTypeParam]) {
+            document.getElementById('itemType').value = itemTypeParam;
         }
-        updateModsList();
+        renderModSelectors();
     };
 
-    function toggleSpecialRunes() {
-        const box = document.getElementById('special-runes-box');
-        const checkbox = document.getElementById('enable_special');
-        box.style.display = checkbox.checked ? 'block' : 'none';
+    function toggleMetaBox() {
+        const box = document.getElementById('meta-dropdowns');
+        box.style.display = document.getElementById('enable_meta').checked ? 'block' : 'none';
     }
 
-    function updateModsList() {
+    function renderModSelectors() {
         const category = document.getElementById('itemType').value;
-        const container = document.getElementById('dynamic-mods-container');
-        container.innerHTML = '';
+        const data = poe2StructuredMods[category] || { prefixes: ["Maximum Life"], suffixes: ["Fire Resistance"] };
 
-        const availableMods = poe2Mods[category] || ["Maximum Life", "Resistances"];
+        const prefContainer = document.getElementById('prefix-container');
+        const suffContainer = document.getElementById('suffix-container');
+        prefContainer.innerHTML = '';
+        suffContainer.innerHTML = '';
 
-        // Создаем 4 строки для ввода модов
-        for (let i = 0; i < 4; i++) {
-            let row = document.createElement('div');
-            row.className = 'mod-row';
-            
-            let selectMod = document.createElement('select');
-            selectMod.className = 'mod-choice';
-            
-            let defaultOpt = document.createElement('option');
-            defaultOpt.value = "";
-            defaultOpt.textContent = "-- Не выбран (Любой) --";
-            selectMod.appendChild(defaultOpt);
-
-            availableMods.forEach(mod => {
-                let opt = document.createElement('option');
-                opt.value = mod;
-                opt.textContent = mod;
-                selectMod.appendChild(opt);
-            });
-
-            let selectTier = document.createElement('select');
-            selectTier.className = 'tier-choice';
-            selectTier.style.width = "90px";
-            selectTier.innerHTML = `
-                <option value="T1">T1</option>
-                <option value="T2" selected>T2</option>
-                <option value="T3">T3</option>
-            `;
-
-            row.appendChild(selectMod);
-            row.appendChild(selectTier);
-            container.appendChild(row);
+        // Рисуем 3 слота для префиксов
+        for (let i = 0; i < 3; i++) {
+            prefContainer.appendChild(createRow('prefix', data.prefixes, i + 1));
         }
+        // Рисуем 3 слота для суффиксов
+        for (let i = 0; i < 3; i++) {
+            suffContainer.appendChild(createRow('suffix', data.suffixes, i + 1));
+        }
+        updateCounters();
+    }
+
+    function createRow(type, modList, index) {
+        let row = document.createElement('div');
+        row.className = 'mod-row';
+
+        let badge = document.createElement('div');
+        badge.className = `slot-badge badge-${type}`;
+        badge.textContent = `${type.toUpperCase()} ${index}`;
+
+        let selectMod = document.createElement('select');
+        selectMod.className = 'mod-choice';
+        selectMod.onchange = updateCounters;
+
+        let defaultOpt = document.createElement('option');
+        defaultOpt.value = "";
+        defaultOpt.textContent = "-- Не выбран (Свободный слот) --";
+        selectMod.appendChild(defaultOpt);
+
+        modList.forEach(mod => {
+            let opt = document.createElement('option');
+            opt.value = mod;
+            opt.textContent = mod;
+            selectMod.appendChild(opt);
+        });
+
+        let selectTier = document.createElement('select');
+        selectTier.className = 'tier-choice';
+        selectTier.style.width = "75px";
+        selectTier.innerHTML = `
+            <option value="T1">T1</option>
+            <option value="T2" selected>T2</option>
+            <option value="T3">T3</option>
+        `;
+
+        row.appendChild(badge);
+        row.appendChild(selectMod);
+        row.appendChild(selectTier);
+        return row;
+    }
+
+    function updateCounters() {
+        const prefRows = document.querySelectorAll('#prefix-container .mod-choice');
+        const suffRows = document.querySelectorAll('#suffix-container .mod-choice');
+        
+        let prefsCount = 0;
+        let suffsCount = 0;
+
+        prefRows.forEach(el => { if(el.value) prefsCount++; });
+        suffRows.forEach(el => { if(el.value) suffsCount++; });
+
+        document.getElementById('slots-counter').textContent = `Выбрано префиксов: ${prefsCount}/3 | суффиксов: ${suffsCount}/3`;
     }
 
     function submitConfig() {
         const itemType = document.getElementById('itemType').value;
         const budget = document.getElementById('budget').value;
         
-        const rows = document.querySelectorAll('.mod-row');
         let mods = [];
-        rows.forEach(row => {
-            const modName = row.querySelector('.mod-choice').value;
+
+        // Собираем префиксы
+        document.querySelectorAll('#prefix-container .mod-row').forEach(row => {
+            const mod = row.querySelector('.mod-choice').value;
             const tier = row.querySelector('.tier-choice').value;
-            if (modName) {
-                mods.push(`${modName} (${tier})`);
-            }
+            if (mod) mods.push(`[Prefix] ${mod} (${tier})`);
         });
 
+        // Собираем суффиксы
+        document.querySelectorAll('#suffix-container .mod-row').forEach(row => {
+            const mod = row.querySelector('.mod-choice').value;
+            const tier = row.querySelector('.tier-choice').value;
+            if (mod) mods.push(`[Suffix] ${mod} (${tier})`);
+        });
+
+        // Собираем мета-крафт и руны
         let options = [];
-        const specialEnabled = document.getElementById('enable_special').checked;
-        if (specialEnabled) {
-            const runeVal = document.getElementById('runeSelect').value;
-            options.push(`Special Rune/Meta: ${runeVal}`);
+        if (document.getElementById('enable_meta').checked) {
+            options.push(document.getElementById('metaSelect').value);
         }
 
         const payload = {
