@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExileForge Craft Configurator</title>
-    <!-- Официальный скрипт Telegram Web App SDK -->
+    <title>ExileForge PoE 2 Craft Configurator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -15,84 +14,75 @@
             --gold-hover: #e2c792;
             --text-main: #c8c8c8;
             --text-muted: #7f7f7f;
-            --accent-red: #990000;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 16px;
+            padding: 14px;
         }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 480px; margin: 0 auto; }
         h2 {
             color: var(--gold);
             text-align: center;
-            font-family: 'Cinzel', serif, sans-serif;
+            font-family: serif;
             letter-spacing: 1px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
-
         .card {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 14px;
-            margin-bottom: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
-
         label {
             display: block;
             color: var(--gold);
-            font-size: 13px;
-            margin-bottom: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-
         input, select {
             width: 100%;
             background-color: #07080a;
             border: 1px solid var(--border-color);
             color: #fff;
-            padding: 10px;
+            padding: 8px;
             border-radius: 4px;
             box-sizing: border-box;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-
-        .mod-row {
-            display: flex;
-            gap: 8px;
+            font-size: 13px;
             margin-bottom: 8px;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--gold); }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .checkbox-label {
+            display: flex;
             align-items: center;
+            font-size: 13px;
+            color: #d1d1d1;
+            cursor: pointer;
         }
-
-        .mod-row input {
-            flex: 2;
+        .checkbox-label input {
+            width: auto;
+            margin-right: 8px;
             margin-bottom: 0;
+            accent-color: var(--gold);
         }
-
-        .mod-row select {
-            flex: 1;
-            margin-bottom: 0;
+        .mod-select-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
         }
-
         .btn {
             background: linear-gradient(to bottom, #cbb07e, #8c7142);
             color: #111;
@@ -106,111 +96,159 @@
             letter-spacing: 1px;
             font-size: 14px;
             margin-top: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
-
-        .btn:hover {
-            background: linear-gradient(to bottom, #e2c792, #a3834b);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--gold);
-            padding: 8px;
-            font-size: 12px;
-            margin-top: 6px;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(203, 176, 126, 0.1);
-        }
+        .btn:hover { background: linear-gradient(to bottom, #e2c792, #a3834b); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ExileForge Crafting Setup</h2>
+    <h2>PoE 2 Craft Setup</h2>
+
+    <!-- Выбор типа шмотки -->
+    <div class="card">
+        <label for="itemType">Item Category</label>
+        <select id="itemType" onchange="updateModsList()">
+            <option value="Ring">Ring</option>
+            <option value="Amulet">Amulet</option>
+            <option value="Bow">Bow</option>
+            <option value="BodyArmour">Body Armour</option>
+            <option value="Helmet">Helmet</option>
+            <option value="Boots">Boots</option>
+            <option value="Belt">Belt</option>
+        </select>
+    </div>
 
     <!-- Бюджет -->
     <div class="card">
         <label for="budget">Max Budget (Divine Orbs)</label>
-        <input type="number" id="budget" placeholder="e.g. 25" value="20">
+        <input type="number" id="budget" value="15">
     </div>
 
-    <!-- Желаемые моды -->
+    <!-- Желаемые моды (кликабельный список) -->
     <div class="card">
-        <label>Target Modifiers & Tiers</label>
-        <div id="mods-container">
-            <div class="mod-row">
-                <input type="text" class="mod-name" placeholder="Mod name (e.g. Maximum Life)">
-                <select class="mod-tier">
-                    <option value="T1">T1 (Ideal)</option>
-                    <option value="T2" selected>T2 (Good)</option>
-                    <option value="T3">T3 (Budget)</option>
-                </select>
-            </div>
-            <div class="mod-row">
-                <input type="text" class="mod-name" placeholder="Mod name (e.g. Fire Resistance)">
-                <select class="mod-tier">
-                    <option value="T1">T1 (Ideal)</option>
-                    <option value="T2" selected>T2 (Good)</option>
-                    <option value="T3">T3 (Budget)</option>
-                </select>
-            </div>
+        <label>Target Modifiers (Select & Tier)</label>
+        <div id="dynamic-mods-container">
+            <!-- Сюда скрипт динамически воткнет селекторы модов -->
         </div>
-        <button class="btn btn-secondary" onclick="addModRow()">+ Add Another Mod</button>
     </div>
 
-    <!-- Кнопка отправки в бот -->
-    <button class="btn" onclick="submitCraftConfig()">Initialize Craft Wizard</button>
+    <!-- Спец-руны, омены и фичи крафта -->
+    <div class="card">
+        <label>Advanced Crafting Options (Runes & Omens)</label>
+        <div class="checkbox-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="opt_astral" value="Astral Crystallization"> 
+                Extra Suffix / Prefix (Astral / Crystallization Omen)
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="opt_fracture" value="Allow Fractured Base"> 
+                Use Fractured Base if available
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="opt_rune_meta" value="Can roll specialized modifiers"> 
+                Using Specialized Runes (e.g. Chronomancer / Caster mods)
+            </label>
+        </div>
+    </div>
+
+    <button class="btn" onclick="submitConfig()">НАЧАТЬ КРАФТ</button>
 </div>
 
 <script>
-    // Инициализация Telegram Web App
     let tg = window.Telegram.WebApp;
-    tg.expand(); // Разворачиваем на весь экран
+    tg.expand();
 
-    function addModRow() {
-        const container = document.getElementById('mods-container');
-        const row = document.createElement('div');
-        row.className = 'mod-row';
-        row.innerHTML = `
-            <input type="text" class="mod-name" placeholder="Mod name (e.g. Attack Speed)">
-            <select class="mod-tier">
-                <option value="T1">T1</option>
-                <option value="T2" selected>T2</option>
-                <option value="T3">T3</option>
-            </select>
-        `;
-        container.appendChild(row);
+    // База модов по категориям
+    const modsDatabase = {
+        "Ring": ["Any Life", "Maximum Life", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity"],
+        "Amulet": ["Any Life", "Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "Attributes (Str/Dex/Int)", "Fire/Cold/Lightning Res", "Mana Regeneration"],
+        "Bow": ["Increased Physical Damage %", "Adds Physical Damage", "Attack Speed", "Critical Strike Chance", "Elemental Damage to Attacks", "+1 to Level of Bow Skills"],
+        "BodyArmour": ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / ES", "Elemental Resistances", "Movement Speed / Life Regen"],
+        "Helmet": ["Maximum Life", "Resistances", "Mana", "Cooldown Recovery", "Armor/ES"],
+        "Boots": ["Movement Speed", "Maximum Life", "Resistances", "Suppress Spell Damage"],
+        "Belt": ["Maximum Life", "Flask/Charm charges", "Armor", "Resistances", "Strength / Life Regen"]
+    };
+
+    // Автоматически читаем тип шмотки из URL-параметра, который передал бот (?type=Bow)
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemTypeParam = urlParams.get('type');
+        
+        const selectElement = document.getElementById('itemType');
+        if (itemTypeParam && modsDatabase[itemTypeParam]) {
+            selectElement.value = itemTypeParam; // Выставляем нужный тип автоматически
+        }
+        
+        updateModsList(); // Заполняем моды для этого типа
+    };
+
+    function updateModsList() {
+        const category = document.getElementById('itemType').value;
+        const container = document.getElementById('dynamic-mods-container');
+        container.innerHTML = '';
+
+        const availableMods = modsDatabase[category] || ["Maximum Life", "Resistances"];
+
+        for (let i = 0; i < 3; i++) {
+            let row = document.createElement('div');
+            row.className = 'mod-select-row';
+            
+            let selectMod = document.createElement('select');
+            selectMod.className = 'mod-choice';
+            
+            let defaultOpt = document.createElement('option');
+            defaultOpt.value = "Any / Not Critical";
+            defaultOpt.textContent = "-- Any / Skip Slot --";
+            selectMod.appendChild(defaultOpt);
+
+            availableMods.forEach(mod => {
+                let opt = document.createElement('option');
+                opt.value = mod;
+                opt.textContent = mod;
+                selectMod.appendChild(opt);
+            });
+
+            let selectTier = document.createElement('select');
+            selectTier.className = 'tier-choice';
+            selectTier.innerHTML = `
+                <option value="T1">T1 (Ideal)</option>
+                <option value="T2" selected>T2 (Good)</option>
+                <option value="T3">T3 (Budget)</option>
+            `;
+
+            row.appendChild(selectMod);
+            row.appendChild(selectTier);
+            container.appendChild(row);
+        }
     }
 
-    function submitCraftConfig() {
+    function submitConfig() {
+        const itemType = document.getElementById('itemType').value;
         const budget = document.getElementById('budget').value;
-        const rows = document.querySelectorAll('.mod-row');
+        
+        const rows = document.querySelectorAll('.mod-select-row');
         let mods = [];
-
         rows.forEach(row => {
-            const name = row.querySelector('.mod-name').value.trim();
-            const tier = row.querySelector('.mod-tier').value;
-            if (name) {
-                mods.push(`${name} (${tier})`);
+            const modName = row.querySelector('.mod-choice').value;
+            const tier = row.querySelector('.tier-choice').value;
+            if (modName && !modName.includes("Any")) {
+                mods.push(`${modName} (${tier})`);
             }
         });
 
-        if (mods.length === 0) {
-            alert('Please add at least one target modifier!');
-            return;
-        }
+        let options = [];
+        if (document.getElementById('opt_astral').checked) options.push("Extra Suffix/Prefix (Astral/Crystallization)");
+        if (document.getElementById('opt_fracture').checked) options.push("Use Fractured Base");
+        if (document.getElementById('opt_rune_meta').checked) options.push("Specialized Runes / Meta-mods enabled");
 
-        // Формируем JSON-пакет данных для отправки боту
         const payload = {
+            item_type: itemType,
             budget: budget,
-            mods: mods
+            mods: mods.length > 0 ? mods : ["Any mods"],
+            options: options
         };
 
-        // Передаем данные обратно в Telegram-бот и закрываем миниапп
         tg.sendData(JSON.stringify(payload));
         tg.close();
     }
