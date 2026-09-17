@@ -13,17 +13,8 @@
             --border-gold: #735d38;
             --border-gold-hover: #cbb07e;
             --gold-text: #cbb07e;
-            
-            /* Цвета по классификации PoE2 */
             --prefix-color: #8888ff;  /* Голубой */
-            --suffix-color: #339933;  /* Базовый зеленый суффикс */
-            
-            /* Спец-пулы (Цвета по твоему ТЗ) */
-            --attack-color: #2ecc71;  /* Зеленый - Атакующие */
-            --caster-color: #e74c3c;  /* Красный - Кастерские */
-            --chrono-color: #ffffff;  /* Белый - Хрономансер */
-            --soul-color: #9b59b6;    /* Фиолетовый - Души */
-            
+            --suffix-color: #339933;  /* Зеленый */
             --text-main: #c8c8c8;
         }
 
@@ -51,7 +42,6 @@
             padding-bottom: 6px;
         }
 
-        /* Табы (Вкладки) */
         .tabs {
             display: flex;
             gap: 4px;
@@ -137,16 +127,20 @@
 
         .slot-badge {
             font-size: 10px;
-            padding: 2px 4px;
+            padding: 3px 4px;
             border-radius: 2px;
             font-weight: bold;
             text-align: center;
-            width: 60px;
+            width: 65px;
         }
         .badge-prefix { background: rgba(136,136,255,0.15); color: var(--prefix-color); border: 1px solid var(--prefix-color); }
         .badge-suffix { background: rgba(51,153,51,0.15); color: var(--suffix-color); border: 1px solid var(--suffix-color); }
 
-        /* Стили для продвинутых галочек */
+        .mod-choice {
+            flex-grow: 1;
+            margin-bottom: 0 !important;
+        }
+
         .advanced-group {
             display: flex;
             flex-direction: column;
@@ -161,10 +155,10 @@
         }
         .adv-label input { width: auto; margin-right: 8px; margin-bottom: 0; accent-color: var(--gold-text); }
         
-        .lbl-attack { color: var(--attack-color); }
-        .lbl-caster { color: var(--caster-color); }
-        .lbl-chrono { color: var(--chrono-color); }
-        .lbl-soul { color: var(--soul-color); }
+        .lbl-attack { color: #2ecc71; }
+        .lbl-caster { color: #e74c3c; }
+        .lbl-chrono { color: #ffffff; }
+        .lbl-soul { color: #9b59b6; }
         .lbl-astrid { color: var(--gold-text); }
 
         .poe-btn {
@@ -196,13 +190,13 @@
 <div class="container">
     <h2>ExileForge Configurator</h2>
 
-    <!-- Переключение Вкладок -->
+    <!-- Вкладки -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('basic')">⚖️ Базовый крафт</button>
         <button class="tab-btn" onclick="switchTab('advanced')">✨ Продвинутый крафт</button>
     </div>
 
-    <!-- Общие настройки для обеих вкладок -->
+    <!-- Общие настройки -->
     <div class="poe-panel">
         <label for="itemType">Item Category</label>
         <select id="itemType" onchange="rebuildUI()">
@@ -220,7 +214,7 @@
         <input type="number" id="budget" value="20">
     </div>
 
-    <!-- Вкладка 1: Базовый крафт (Строго 3 префикса и 3 суффикса) -->
+    <!-- Вкладка 1: Базовый крафт -->
     <div id="tab-basic" class="tab-content active">
         <div class="poe-panel">
             <div class="section-title prefix-title"><span>🔹 Префиксы (База: 3)</span></div>
@@ -231,7 +225,7 @@
         </div>
     </div>
 
-    <!-- Вкладка 2: Продвинутый крафт (Динамические пулы и 4-й суффикс) -->
+    <!-- Вкладка 2: Продвинутый крафт -->
     <div id="tab-advanced" class="tab-content">
         <div class="poe-panel">
             <label style="color: var(--gold-text); margin-bottom: 6px; font-weight: bold;">🧩 Расширение пула модов (Галочки):</label>
@@ -275,48 +269,47 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Базовые пулы модов
+    // Все полноценные базовые пулы модов по категориям PoE 2
     const baseMods = {
         "Gloves": {
-            prefixes: ["Maximum Life", "Armour & Evasion %", "Flat Physical Damage"],
-            suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed"]
+            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Armour & Evasion %", "Flat Physical Damage to Attacks", "Flat Fire Damage to Attacks", "Flat Cold Damage to Attacks", "Flat Lightning Damage to Attacks", "Increased Armour / Evasion", "Life Regeneration Rate"],
+            suffixes: ["Lightning Resistance", "Cold Resistance", "Fire Resistance", "Chaos Resistance", "Attack Speed", "Cast Speed", "Deflection Rating", "Suppress Spell Damage", "Attributes (Str/Dex/Int)", "Accuracy Rating"]
         },
         "Ring": {
-            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield"],
-            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed"]
+            prefixes: ["Maximum Life", "Maximum Mana", "Flat Energy Shield", "Added Physical Damage to Attacks", "Added Fire Damage to Attacks", "Added Cold Damage to Attacks", "Added Lightning Damage to Attacks", "% Increased Energy Shield", "% Increased Armour"],
+            suffixes: ["Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Cast Speed", "Attack Speed", "Increased Rarity of Items", "Attributes (Str/Dex/Int)", "Life Regeneration per second", "Mana Regeneration Rate"]
         },
         "Amulet": {
-            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Multiplier"],
-            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance"]
+            prefixes: ["Maximum Life", "Level of all Skill Gems", "Global Critical Strike Multiplier", "% Increased Attributes", "Energy Shield %", "Flat Energy Shield", "Physical Damage Converted to Elemental"],
+            suffixes: ["Attributes (Str/Dex/Int)", "Fire Resistance", "Cold Resistance", "Lightning Resistance", "Chaos Resistance", "Mana Regeneration Rate", "Critical Strike Chance", "Life Leech"]
         },
         "Bow": {
-            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills"],
-            suffixes: ["Attack Speed", "Critical Strike Chance", "Accuracy Rating"]
+            prefixes: ["Increased Physical Damage %", "Adds Physical Damage", "+1 to Level of Bow Skills", "Elemental Damage to Attacks", "Critical Strike Chance for Bows", "Attack Speed %", "Socketed Gems get increased benefits"],
+            suffixes: ["Attack Speed", "Critical Strike Multiplier", "Accuracy Rating", "Attribute Requirements", "Projectiles pierce additional target", "Chance to cause Bleeding/Poison"]
         },
         "BodyArmour": {
-            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / ES"],
-            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery"]
+            prefixes: ["Maximum Life", "Armour / Evasion / ES %", "Flat Armour / Evasion / ES", "Soul modifiers (Increased Soul Generation)", "Life Recovery Rate", "Physical Damage Reduction"],
+            suffixes: ["Elemental Resistances", "Chaos Resistance", "Stun Recovery", "Attribute Requirements", "Soul modifiers (Reduced Soul Consumption)", "Avoid Elemental Ailments"]
         },
         "Helmet": {
-            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life"],
-            suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements"]
+            prefixes: ["Maximum Life", "Armour / ES %", "Flat Life / Mana", "Soul Gain Prevention Duration", "Energy Shield Recharge Rate"],
+            suffixes: ["Resistances", "Cooldown Recovery", "Attribute Requirements", "Stun Threshold", "Increased Rarity of Items found", "Aura Effect"]
         },
         "Boots": {
-            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery"],
-            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage"]
+            prefixes: ["Maximum Life", "Armour / Evasion %", "Flat Life Recovery", "Energy Shield Recharge Rate"],
+            suffixes: ["Movement Speed", "Resistances", "Suppress Spell Damage", "Avoid Elemental Ailments", "Action Speed"]
         },
         "Belt": {
-            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained"],
-            suffixes: ["Resistances", "Strength / Life Regen"]
+            prefixes: ["Maximum Life", "Armor / Evasion", "Flask Charges gained", "Charm Charges gained", "Increased Flask Life/Mana Recovery rate"],
+            suffixes: ["Resistances", "Strength / Life Regen", "Charm Effect Duration", "Reduced Flask Charges used", "Chaos Resistance", "Attributes"]
         }
     };
 
-    // Специфические моды, которые добавляются по галочкам в продвинутом крафте
     const advancedPools = {
-        attack: ["Added Physical Damage to Attacks", "Attack Damage Leeched as Life", "Increased Attack Speed per Frenzy Charge"],
-        caster: ["Increased Spell Damage", "Faster Casting", "+1 to Level of All Spell Skill Gems", "Gain Mana per Enemy Killed"],
-        chrono: ["Time-woven Armor Bonus", "Chronomancer Action Speed Boost", "Delayed Damage mitigation"],
-        soul: ["Soul Generation Rate", "Reduced Soul Consumption", "Soul Eater effect duration"]
+        attack: ["Added Physical Damage to Attacks", "Attack Damage Leeched as Life", "Increased Attack Speed per Frenzy Charge", "Global Accuracy Rating", "Stun Threshold reduction for attacks"],
+        caster: ["Increased Spell Damage", "Faster Casting", "+1 to Level of All Spell Skill Gems", "Gain Mana per Enemy Killed", "Critical Strike Chance for Spells"],
+        chrono: ["Time-woven Armor Bonus", "Chronomancer Action Speed Boost", "Delayed Damage mitigation", "Cooldown Recovery Rate for Time skills"],
+        soul: ["Soul Generation Rate", "Reduced Soul Consumption", "Soul Eater effect duration", "Maximum Soul capacity bonus"]
     };
 
     function switchTab(tabName) {
@@ -346,7 +339,6 @@
         const category = document.getElementById('itemType').value;
         const base = baseMods[category] || { prefixes: ["Maximum Life"], suffixes: ["Fire Resistance"] };
 
-        // Собираем динамический пул для продвинутой вкладки
         let advPrefixes = [...base.prefixes];
         let advSuffixes = [...base.suffixes];
 
@@ -358,11 +350,9 @@
             advSuffixes.push("Reduced Soul Consumption");
         }
 
-        // Рендерим Базовую вкладку (Строго 3 и 3)
         renderContainer('basic-prefix-container', 'prefix', base.prefixes, 3);
         renderContainer('basic-suffix-container', 'suffix', base.suffixes, 3);
 
-        // Рендерим Продвинутую вкладку (С учетом Астрид на 4-й суффикс)
         const allowAstrid = document.getElementById('chk_astrid').checked;
         const suffixSlots = allowAstrid ? 4 : 3;
         
@@ -403,18 +393,8 @@
             selectMod.appendChild(opt);
         });
 
-        let selectTier = document.createElement('select');
-        selectTier.className = 'tier-choice';
-        selectTier.style.width = "75px";
-        selectTier.innerHTML = `
-            <option value="T1">T1</option>
-            <option value="T2" selected>T2</option>
-            <option value="T3">T3</option>
-        `;
-
         row.appendChild(badge);
         row.appendChild(selectMod);
-        row.appendChild(selectTier);
         return row;
     }
 
@@ -422,7 +402,6 @@
         const itemType = document.getElementById('itemType').value;
         const budget = document.getElementById('budget').value;
         
-        // Определяем, какая вкладка сейчас активна, чтобы забрать данные оттуда
         const isAdvanced = document.getElementById('tab-advanced').classList.contains('active');
         const prefixContainerId = isAdvanced ? 'adv-prefix-container' : 'basic-prefix-container';
         const suffixContainerId = isAdvanced ? 'adv-suffix-container' : 'basic-suffix-container';
@@ -431,14 +410,12 @@
 
         document.querySelectorAll(`#${prefixContainerId} .mod-row`).forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
-            const tier = row.querySelector('.tier-choice').value;
-            if (mod) mods.push(`[Prefix] ${mod} (${tier})`);
+            if (mod) mods.push(`[Prefix] ${mod} (T1 Target)`);
         });
 
         document.querySelectorAll(`#${suffixContainerId} .mod-row`).forEach(row => {
             const mod = row.querySelector('.mod-choice').value;
-            const tier = row.querySelector('.tier-choice').value;
-            if (mod) mods.push(`[Suffix] ${mod} (${tier})`);
+            if (mod) mods.push(`[Suffix] ${mod} (T1 Target)`);
         });
 
         let activeOptions = [];
